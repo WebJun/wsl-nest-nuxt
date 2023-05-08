@@ -9,6 +9,7 @@ export class UsersController {
 
   @Get()
   async index(): Promise<User[]> {
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
     return await this.userService.findAll();
   }
   @Get(':id')

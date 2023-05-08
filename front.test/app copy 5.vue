@@ -2,25 +2,9 @@
 const { data, refresh } = await useAsyncData(() => $fetch(`http://back.test/users`))
 // data.value.reverse();
 
-let aaa = () => {
+let aaa = function () {
     console.log(1)
 }
-
-class ArticleModel {
-    constructor(params) {
-        console.log(155)
-    }
-    async get() {
-        console.log(1)
-        const { data, refresh } = await useAsyncData(() => $fetch(`http://back.test/users`))
-        console.log(1)
-    }
-    add() {
-        console.log(12)
-    }
-}
-let articleModel = new ArticleModel()
-// articleModel.get()
 
 const add = async () => {
     aaa();
