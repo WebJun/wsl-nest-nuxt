@@ -3,24 +3,26 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { User } from './users/user.entity';
-import { UsersModule } from './users/users.module';
+import { Article } from './articles/article.entity';
+import { ArticlesModule } from './articles/articles.module';
 
 @Module({
-    imports: [TypeOrmModule.forRoot({
-        type: 'mysql',
-        host: 'back.db',
-        port: 3306,
-        username: 'root',
-        password: 'docker123',
-        database: 'nuxt',
-        entities: [User],
-        synchronize: true,
-    }), UsersModule],
-    controllers: [AppController],
-    providers: [AppService],
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: 'back.db',
+      port: 3306,
+      username: 'root',
+      password: 'docker123',
+      database: 'nuxt',
+      entities: [Article],
+      synchronize: true,
+    }),
+    ArticlesModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {
-    constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
 }
-

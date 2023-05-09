@@ -5,23 +5,23 @@ class ArticleModel {
         this.API_URI = 'http://back.test'
     }
     async get() {
-        const { data } = await useAsyncData(() => $fetch(`${this.API_URI}/users`))
+        const { data } = await useAsyncData(() => $fetch(`${this.API_URI}/articles`))
         return data
     }
     async add(postData) {
-        await useAsyncData(() => $fetch(`${this.API_URI}/users`, {
+        await useAsyncData(() => $fetch(`${this.API_URI}/articles`, {
             method: 'post',
             body: postData
         }))
     }
     async edit(id, postData) {
-        await useAsyncData(() => $fetch(`${this.API_URI}/users/${id}`, {
+        await useAsyncData(() => $fetch(`${this.API_URI}/articles/${id}`, {
             method: 'put',
             body: postData
         }))
     }
     async delete(id) {
-        await useAsyncData(() => $fetch(`${this.API_URI}/users/${id}`, {
+        await useAsyncData(() => $fetch(`${this.API_URI}/articles/${id}`, {
             method: 'delete',
         }))
     }
@@ -228,7 +228,8 @@ let editMode = ref(true)
                                     <th scope="col">#</th>
                                     <th scope="col">title</th>
                                     <th scope="col">content</th>
-                                    <th scope="col">isActive</th>
+                                    <th scope="col">userId</th>
+                                    <th scope="col">createdAt</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -237,7 +238,8 @@ let editMode = ref(true)
                                     <td>{{ article.id }}</td>
                                     <td>{{ article.title }}</td>
                                     <td>{{ article.content }}</td>
-                                    <td>{{ article.isActive }}</td>
+                                    <td>{{ article.userId }}</td>
+                                    <td>{{ article.createdAt }}</td>
                                 </tr>
                             </tbody>
                         </table>
