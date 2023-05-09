@@ -1,43 +1,90 @@
 <script setup>
-const { data, refresh } = await useAsyncData(() => $fetch(`http://back.test/users`))
-// data.value.reverse();
-
-let aaa = () => {
-    console.log(1)
-}
 
 class ArticleModel {
-    constructor(params) {
-        console.log(155)
+    constructor() {
+        this.API_URI = 'http://back.test'
     }
     async get() {
-        console.log(1)
-        const { data, refresh } = await useAsyncData(() => $fetch(`http://back.test/users`))
-        console.log(1)
+        const { data } = await useAsyncData(() => $fetch(`${this.API_URI}/users`))
+        return data
     }
-    add() {
-        console.log(12)
+    async add(postData) {
+        await useAsyncData(() => $fetch(`${this.API_URI}/users`, {
+            method: 'post',
+            body: postData
+        }))
+    }
+    async edit(id, postData) {
+        await useAsyncData(() => $fetch(`${this.API_URI}/users/${id}`, {
+            method: 'put',
+            body: postData
+        }))
+    }
+    async delete(id) {
+        await useAsyncData(() => $fetch(`${this.API_URI}/users/${id}`, {
+            method: 'delete',
+        }))
     }
 }
-let articleModel = new ArticleModel()
-// articleModel.get()
 
-const add = async () => {
-    aaa();
-    const title = document.querySelector('.title')
-    const content = document.querySelector('.content')
+class AritcleView {
+    reset() {
+        editMode.value = true
+        title.value = '';
+        content.value = '';
+    }
+}
 
-    await useAsyncData(() => $fetch('http://back.test/users', {
-        method: 'post',
-        body: {
+class ArticleController {
+    constructor() {
+        this.articleModel = new ArticleModel()
+        this.aritcleView = new AritcleView()
+    }
+    async get() {
+        return this.articleModel.get()
+    }
+    async add() {
+        const postData = {
             title: title.value,
-            content: content.value
+            content: content.value,
         }
-    }))
-    title.value = '';
-    content.value = '';
-    refresh();
+        await this.articleModel.add(postData)
+        await this.get()
+        this.reset()
+    }
+    async edit() {
+        const postData = {
+            title: title.value,
+            content: content.value,
+        }
+        await this.articleModel.edit(id.value, postData)
+        await this.get()
+        this.reset()
+    }
+    async delete() {
+        await this.articleModel.delete(id.value)
+        await this.get()
+        this.reset()
+    }
+    onClick(index) {
+        editMode.value = false
+        const article = articles.value[index]
+        title.value = article.title
+        content.value = article.content
+        id.value = article.id
+    }
+    reset() {
+        this.aritcleView.reset()
+    }
 }
+const articleController = new ArticleController()
+const articles = await articleController.get()
+
+let title = ref('')
+let content = ref('')
+let id = ref('')
+let editMode = ref(true)
+
 </script>
 
 <template>
@@ -153,21 +200,29 @@ const add = async () => {
 
                     <div>
                         <div class="form-floating mb-3">
-                            <input type="email" class="form-control title" id="floatingInput"
-                                placeholder="name@example.com">
-                            <label for="floatingInput">title</label>
+                            <input type="email" class="form-control title" placeholder="title" v-model="title">
+                            <label>title</label>
                         </div>
                         <div class="form-floating">
-                            <textarea class="form-control content" placeholder="Leave a comment here" id="floatingTextarea2"
+                            <textarea class="form-control content" placeholder="content" v-model="content"
                                 style="height: 100px"></textarea>
-                            <label for="floatingTextarea2">content</label>
+                            <label>content</label>
                         </div>
-                        <button type="button" class="btn btn-primary" @click="add">추가</button>
+                        <div style="margin-top:3px;">
+                            <button type="button" class="btn btn-sm btn-success mar3" @click="articleController.reset"
+                                v-if="!editMode">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-primary mar3" @click="articleController.add"
+                                v-if="editMode">Add</button>
+                            <button type="button" class="btn btn-sm btn-primary mar3" @click="articleController.edit"
+                                v-if="!editMode">Edit</button>
+                            <button type="button" class="btn btn-sm btn-danger mar3" @click="articleController.delete"
+                                v-if="!editMode">Delete</button>
+                        </div>
                     </div>
 
                     <h2>Section title</h2>
                     <div class="table-responsive">
-                        <table class="table table-striped table-sm">
+                        <table class="table table-striped table-sm articleList">
                             <thead>
                                 <tr>
                                     <th scope="col">#</th>
@@ -177,11 +232,12 @@ const add = async () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="d in data">
-                                    <td>{{ d.id }}</td>
-                                    <td>{{ d.title }}</td>
-                                    <td>{{ d.content }}</td>
-                                    <td>{{ d.isActive }}</td>
+                                <tr v-for="(article, index) in articles" :key="article.id"
+                                    @click="articleController.onClick(index)">
+                                    <td>{{ article.id }}</td>
+                                    <td>{{ article.title }}</td>
+                                    <td>{{ article.content }}</td>
+                                    <td>{{ article.isActive }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -311,5 +367,14 @@ body {
     .bd-placeholder-img-lg {
         font-size: 3.5rem;
     }
+}
+</style>
+<style scoped>
+.articleList tbody td {
+    cursor: pointer;
+}
+
+.mar3 {
+    margin-right: 3px;
 }
 </style>
