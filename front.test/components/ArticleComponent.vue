@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import axios, { AxiosResponse } from 'axios'
 
 interface Article {
     id: number
@@ -15,46 +16,28 @@ interface ArticlePostData {
 }
 
 class ArticleModel {
-    private readonly API_URI: string
-
-    constructor() {
-        this.API_URI = 'http://back.test'
-    }
+    private readonly API_URI = 'http://back.test'
 
     async get(): Promise<Article[]> {
-        const { data } = await useAsyncData<Article[]>(() => $fetch(`${this.API_URI}/articles`))
-        return data._rawValue
+        const { data }: AxiosResponse<Article[]> = await axios.get(`${this.API_URI}/articles`)
+        return data
     }
 
     async add(postData: ArticlePostData): Promise<void> {
-        await useAsyncData(() =>
-            $fetch(`${this.API_URI}/articles`, {
-                method: 'post',
-                body: postData,
-            }),
-        )
+        await axios.post(`${this.API_URI}/articles`, postData)
     }
 
     async edit(id: number, postData: ArticlePostData): Promise<void> {
-        await useAsyncData(() =>
-            $fetch(`${this.API_URI}/articles/${id}`, {
-                method: 'put',
-                body: postData,
-            }),
-        )
+        await axios.put(`${this.API_URI}/articles/${id}`, postData)
     }
 
     async delete(id: number): Promise<void> {
-        await useAsyncData(() =>
-            $fetch(`${this.API_URI}/articles/${id}`, {
-                method: 'delete',
-            }),
-        )
+        await axios.delete(`${this.API_URI}/articles/${id}`)
     }
 }
 
 class ArticleView {
-    reset() {
+    resetFields() {
         editMode.value = true;
         title.value = '';
         content.value = '';
@@ -81,64 +64,61 @@ class ArticleController {
         this.articleView = new ArticleView()
     }
 
-    public async get(): Promise<Article[]> {
+    public async getArticles(): Promise<Article[]> {
         let articles = await this.articleModel.get()
-        articles = articles.map((article) => {
+        articles = articles.map(article => {
             article.createdAt = this.articleView.getDatetime(article.createdAt)
             return article
         })
         return articles
     }
 
-    public async add(): Promise<void> {
+    public async addArticle(): Promise<void> {
         const postData: ArticlePostData = {
             title: title.value ?? '',
             content: content.value ?? '',
-            userId: 1,
+            userId: 2,
         };
         await this.articleModel.add(postData)
-        articles.value = await this.get()
-        this.reset()
+        articles.value = await this.getArticles()
+        this.articleView.resetFields()
     }
 
-    public async edit(): Promise<void> {
+    public async editArticle(): Promise<void> {
         const postData = {
             title: title.value ?? '',
             content: content.value ?? '',
-            userId: 1,
+            userId: 2,
         }
         await this.articleModel.edit(id.value as number, postData)
-        articles.value = await this.get()
-        this.reset()
+        articles.value = await this.getArticles()
+        this.articleView.resetFields()
     }
 
-    public async delete(): Promise<void> {
+    public async deleteArticle(): Promise<void> {
         await this.articleModel.delete(id.value as number)
-        articles.value = await this.get()
-        this.reset()
+        articles.value = await this.getArticles()
+        this.articleView.resetFields()
     }
 
-    public onClick(article: Article): void {
+    public clickArticle(article: Article): void {
         editMode.value = false
         title.value = article.title
         content.value = article.content
         id.value = article.id
     }
-
-    public reset(): void {
-        this.articleView.reset()
-    }
 }
 
-const title: Ref<string | undefined> = ref()
-const content: Ref<string | undefined> = ref()
-const id: Ref<number | undefined> = ref()
+const title: Ref<string> = ref('')
+const content: Ref<string> = ref('')
+const id: Ref<number> = ref(0)
 const articles: Ref<Article[]> = ref([])
 const editMode: Ref<boolean> = ref(true)
 const articleController = new ArticleController()
+const articleView = new ArticleView()
 
 async function init() {
-    articles.value = await articleController.get()
+    articles.value = await articleController.getArticles()
 }
 
 init()
@@ -165,26 +145,25 @@ init()
         <div>
             <div class="form-floating mb-3">
                 <input type="email" class="form-control title" placeholder="title" v-model="title">
-                <label>title</label>
+                <label class="labelPlaceholder">title</label>
             </div>
             <div class="form-floating">
                 <textarea class="form-control content" placeholder="content" v-model="content"
                     style="height: 100px"></textarea>
-                <label>content</label>
+                <label class="labelPlaceholder">content</label>
             </div>
             <div style="margin-top:3px;">
-                <button type="button" class="btn btn-sm btn-success mar3" @click="articleController.reset"
+                <button type="button" class="btn btn-sm btn-success mar3" @click="articleView.resetFields"
                     v-if="!editMode">Cancel</button>
-                <button type="button" class="btn btn-sm btn-primary mar3" @click="articleController.add"
+                <button type="button" class="btn btn-sm btn-primary mar3" @click="articleController.addArticle"
                     v-if="editMode">Add</button>
-                <button type="button" class="btn btn-sm btn-primary mar3" @click="articleController.edit"
+                <button type="button" class="btn btn-sm btn-primary mar3" @click="articleController.editArticle"
                     v-if="!editMode">Edit</button>
-                <button type="button" class="btn btn-sm btn-danger mar3" @click="articleController.delete"
+                <button type="button" class="btn btn-sm btn-danger mar3" @click="articleController.deleteArticle"
                     v-if="!editMode">Delete</button>
             </div>
         </div>
 
-        <h2>Section title</h2>
         <div class="table-responsive">
             <table class="table table-striped table-sm articleList">
                 <thead>
@@ -197,7 +176,7 @@ init()
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(article, index) in articles" :key="article.id" @click="articleController.onClick(article)">
+                    <tr v-for="(article, index) in articles" :key="article.id" @click="articleController.clickArticle(article)">
                         <td>{{ article.id }}</td>
                         <td>{{ article.title }}</td>
                         <td>{{ article.content }}</td>
@@ -217,5 +196,9 @@ init()
 
 .mar3 {
     margin-right: 3px;
+}
+
+.labelPlaceholder {
+    color: #aaa
 }
 </style>
