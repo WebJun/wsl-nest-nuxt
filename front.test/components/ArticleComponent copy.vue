@@ -1,147 +1,116 @@
-<script lang="ts" setup>
-
-interface Article {
-    id: number
-    title: string
-    content: string
-    createdAt: string
-    userId: number
-}
-
-interface ArticlePostData {
-    title: string
-    content: string
-    userId: number
-}
+<script setup >
 
 class ArticleModel {
-    private readonly API_URI: string
-
     constructor() {
         this.API_URI = 'http://back.test'
     }
-
-    async get(): Promise<Article[]> {
-        const { data } = await useAsyncData<Article[]>(() => $fetch(`${this.API_URI}/articles`))
+    async get() {
+        const { data } = await useAsyncData(() => $fetch(`${this.API_URI}/articles`))
         return data._rawValue
     }
-
-    async add(postData: ArticlePostData): Promise<void> {
-        await useAsyncData(() =>
-            $fetch(`${this.API_URI}/articles`, {
-                method: 'post',
-                body: postData,
-            }),
-        )
+    async add(postData) {
+        await useAsyncData(() => $fetch(`${this.API_URI}/articles`, {
+            method: 'post',
+            body: postData
+        }))
     }
-
-    async edit(id: number, postData: ArticlePostData): Promise<void> {
-        await useAsyncData(() =>
-            $fetch(`${this.API_URI}/articles/${id}`, {
-                method: 'put',
-                body: postData,
-            }),
-        )
+    async edit(id, postData) {
+        await useAsyncData(() => $fetch(`${this.API_URI}/articles/${id}`, {
+            method: 'put',
+            body: postData
+        }))
     }
-
-    async delete(id: number): Promise<void> {
-        await useAsyncData(() =>
-            $fetch(`${this.API_URI}/articles/${id}`, {
-                method: 'delete',
-            }),
-        )
+    async delete(id) {
+        await useAsyncData(() => $fetch(`${this.API_URI}/articles/${id}`, {
+            method: 'delete',
+        }))
     }
 }
 
-class ArticleView {
+class AritcleView {
     reset() {
-        editMode.value = true;
+        editMode.value = true
         title.value = '';
         content.value = '';
     }
-
-    getDatetime(str?: string) {
-        const d = str ? new Date(str) : new Date();
-        const year = d.getFullYear().toString().padStart(4, '0');
-        const month = (d.getMonth() + 1).toString().padStart(2, '0');
-        const day = d.getDate().toString().padStart(2, '0');
-        const hour = d.getHours().toString().padStart(2, '0');
-        const minute = d.getMinutes().toString().padStart(2, '0');
-        const second = d.getSeconds().toString().padStart(2, '0');
-        return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    getDatetime(str) {
+        let d = new Date();
+        if (typeof str !== 'undefined') {
+            d = new Date(str);
+        }
+        let s =
+            String(d.getFullYear()).padStart(4, '0') +
+            '-' +
+            String(d.getMonth() + 1).padStart(2, '0') +
+            '-' +
+            String(d.getDate()).padStart(2, '0') +
+            ' ' +
+            String(d.getHours()).padStart(2, '0') +
+            ':' +
+            String(d.getMinutes()).padStart(2, '0') +
+            ':' +
+            String(d.getSeconds()).padStart(2, '0');
+        return s;
     }
 }
 
 class ArticleController {
-    private readonly articleModel: ArticleModel
-    private readonly articleView: ArticleView
-
     constructor() {
         this.articleModel = new ArticleModel()
-        this.articleView = new ArticleView()
+        this.aritcleView = new AritcleView()
     }
-
-    public async get(): Promise<Article[]> {
+    async get() {
         let articles = await this.articleModel.get()
         articles = articles.map((article) => {
-            article.createdAt = this.articleView.getDatetime(article.createdAt)
+            article.createdAt = this.aritcleView.getDatetime(article.createdAt)
             return article
         })
         return articles
     }
-
-    public async add(): Promise<void> {
-        const postData: ArticlePostData = {
-            title: title.value ?? '',
-            content: content.value ?? '',
+    async add() {
+        const postData = {
+            title: title.value,
+            content: content.value,
             userId: 1,
-        };
+        }
         await this.articleModel.add(postData)
         articles.value = await this.get()
         this.reset()
     }
-
-    public async edit(): Promise<void> {
+    async edit() {
         const postData = {
-            title: title.value ?? '',
-            content: content.value ?? '',
-            userId: 1,
+            title: title.value,
+            content: content.value,
         }
-        await this.articleModel.edit(id.value as number, postData)
+        await this.articleModel.edit(id.value, postData)
         articles.value = await this.get()
         this.reset()
     }
-
-    public async delete(): Promise<void> {
-        await this.articleModel.delete(id.value as number)
+    async delete() {
+        await this.articleModel.delete(id.value)
         articles.value = await this.get()
         this.reset()
     }
-
-    public onClick(article: Article): void {
+    onClick(article) {
         editMode.value = false
         title.value = article.title
         content.value = article.content
         id.value = article.id
     }
-
-    public reset(): void {
-        this.articleView.reset()
+    reset() {
+        this.aritcleView.reset()
     }
 }
 
-const title: Ref<string | undefined> = ref()
-const content: Ref<string | undefined> = ref()
-const id: Ref<number | undefined> = ref()
-const articles: Ref<Article[]> = ref([])
-const editMode: Ref<boolean> = ref(true)
+let title = ref()
+let content = ref()
+let id = ref()
+let articles = ref()
+let editMode = ref(true)
+
 const articleController = new ArticleController()
+articles.value = await articleController.get()
 
-async function init() {
-    articles.value = await articleController.get()
-}
-
-init()
 </script>
 
 
