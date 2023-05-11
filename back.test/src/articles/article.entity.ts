@@ -11,14 +11,18 @@ export class Article {
   @Column()
   title: string;
 
-  @Column({ type: 'text' }) // 'text'로 지정
+  @Column({ type: 'text' })
   content: string;
 
-  @CreateDateColumn({ nullable: false })
-  createdAt: Date;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  hj_created_at: Date;
 
-  @UpdateDateColumn({ nullable: false })
-  updatedAt: Date;
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  hj_updated_at: Date;
 
   //   @DeleteDateColumn({ nullable: false })
   //   deletedAt: Date;

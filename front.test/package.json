@@ -11,6 +11,8 @@
         "nuxt": "^3.4.3"
     },
     "dependencies": {
+        "@ckeditor/ckeditor5-build-classic": "^37.1.0",
+        "@ckeditor/ckeditor5-vue": "^5.1.0",
         "@nuxt/http": "^0.6.4",
         "bootstrap": "^5.2.3"
     }
