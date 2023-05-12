@@ -54,7 +54,7 @@ class ArticleModel {
     private readonly API_URI = 'http://back.test'
 
     async fetch(page: number): Promise<fetchData> {
-        const { data }: AxiosResponse<fetchData> = await axios.get(`${this.API_URI}/articles?page=${page}&limit=10`)
+        const { data }: AxiosResponse<fetchData> = await axios.get(`${this.API_URI}/articles?page=${page}&limit=10&sort=id`)
         return data
     }
 

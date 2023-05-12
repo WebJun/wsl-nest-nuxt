@@ -10,6 +10,37 @@ export class ArticlesService {
     private usersRepository: Repository<Article>,
   ) {}
 
+  async lists(params) {
+    let { page, limit, sort } = params;
+    limit = Number(limit);
+    // console.log(sort);
+    console.log(typeof limit);
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    let currentPage = Number(page);
+    const morePage = 2;
+    const items = await this.findAll(currentPage, limit);
+    const totalCount = await this.count();
+    const pageCount = Math.ceil(totalCount / limit);
+    currentPage = currentPage < 1 ? 1 : currentPage;
+    currentPage = currentPage > pageCount ? pageCount : currentPage;
+    const start = Math.max(currentPage - morePage, 1);
+    const end = Math.min(currentPage + morePage, pageCount);
+    const previous = Math.max(start - morePage, 1);
+    const next = Math.min(end + morePage, pageCount);
+    return {
+      items: items,
+      pagination: {
+        totalCount,
+        pageCount,
+        currentPage,
+        start,
+        end,
+        previous,
+        next,
+      },
+    };
+  }
+
   async findAll(page: number = 1, limit: number = 10): Promise<Article[]> {
     const skip = (page - 1) * limit;
     return this.usersRepository.find({
