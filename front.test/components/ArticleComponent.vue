@@ -15,11 +15,46 @@ interface ArticlePostData {
     userId: number
 }
 
+interface Pagination {
+    totalCount: number
+    pageCount: number
+    currentPage: number
+    start: number
+    end: number
+    previous: number
+    next: number
+}
+
+interface fetchData {
+    items: Array<Article>
+    pagination: Pagination
+}
+
+class Util {
+    getDatetime(str?: string) {
+        const d = str ? new Date(str) : new Date();
+        const year = d.getFullYear().toString().padStart(4, '0');
+        const month = (d.getMonth() + 1).toString().padStart(2, '0');
+        const day = d.getDate().toString().padStart(2, '0');
+        const hour = d.getHours().toString().padStart(2, '0');
+        const minute = d.getMinutes().toString().padStart(2, '0');
+        const second = d.getSeconds().toString().padStart(2, '0');
+        return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    }
+    range(start: number, end: number): number[] {
+        const res: number[] = [];
+        for (let i = start; i <= end; i++) {
+            res.push(i);
+        }
+        return res;
+    }
+}
+
 class ArticleModel {
     private readonly API_URI = 'http://back.test'
 
-    async get(): Promise<Article[]> {
-        const { data }: AxiosResponse<Article[]> = await axios.get(`${this.API_URI}/articles`)
+    async fetch(page: number): Promise<fetchData> {
+        const { data }: AxiosResponse<fetchData> = await axios.get(`${this.API_URI}/articles?page=${page}&limit=10`)
         return data
     }
 
@@ -42,45 +77,41 @@ class ArticleView {
         title.value = '';
         content.value = '';
     }
-
-    getDatetime(str?: string) {
-        const d = str ? new Date(str) : new Date();
-        const year = d.getFullYear().toString().padStart(4, '0');
-        const month = (d.getMonth() + 1).toString().padStart(2, '0');
-        const day = d.getDate().toString().padStart(2, '0');
-        const hour = d.getHours().toString().padStart(2, '0');
-        const minute = d.getMinutes().toString().padStart(2, '0');
-        const second = d.getSeconds().toString().padStart(2, '0');
-        return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-    }
 }
 
 class ArticleController {
+    private readonly util: Util
     private readonly articleModel: ArticleModel
     private readonly articleView: ArticleView
 
     constructor() {
         this.articleModel = new ArticleModel()
         this.articleView = new ArticleView()
+        this.util = new Util
     }
 
-    public async getArticles(): Promise<Article[]> {
-        let articles = await this.articleModel.get()
-        articles = articles.map(article => {
-            article.createdAt = this.articleView.getDatetime(article.createdAt)
+    public async init(): Promise<void> {
+        await this.getArticles()
+    }
+
+    private async getArticles(): Promise<void> {
+        let data = await this.articleModel.fetch(page.value ?? 1)
+        pagination.value = data.pagination
+
+        articles.value = data.items.map(article => {
+            article.createdAt = this.util.getDatetime(article.createdAt)
             return article
         })
-        return articles
     }
 
     public async addArticle(): Promise<void> {
         const postData: ArticlePostData = {
             title: title.value ?? '',
             content: content.value ?? '',
-            userId: 2,
+            userId: 1,
         };
         await this.articleModel.add(postData)
-        articles.value = await this.getArticles()
+        await this.getArticles()
         this.articleView.resetFields()
     }
 
@@ -88,16 +119,16 @@ class ArticleController {
         const postData = {
             title: title.value ?? '',
             content: content.value ?? '',
-            userId: 2,
+            userId: 1,
         }
         await this.articleModel.edit(id.value as number, postData)
-        articles.value = await this.getArticles()
+        await this.getArticles()
         this.articleView.resetFields()
     }
 
     public async deleteArticle(): Promise<void> {
         await this.articleModel.delete(id.value as number)
-        articles.value = await this.getArticles()
+        await this.getArticles()
         this.articleView.resetFields()
     }
 
@@ -107,21 +138,30 @@ class ArticleController {
         content.value = article.content
         id.value = article.id
     }
+
+    public async movePage(p: number) {
+        page.value = p
+        await this.getArticles()
+    }
 }
 
-const title: Ref<string> = ref('')
-const content: Ref<string> = ref('')
-const id: Ref<number> = ref(0)
-const articles: Ref<Article[]> = ref([])
-const editMode: Ref<boolean> = ref(true)
+let title: Ref<string> = ref('')
+let content: Ref<string> = ref('')
+let id: Ref<number> = ref(0)
+let editMode: Ref<boolean> = ref(true)
+let articles: Ref<Article[]> = ref([])
+let page: Ref<number> = ref(1)
+// let pagination: Ref<Pagination> = ref()
+let pagination: Ref<any> = ref()
+
 const articleController = new ArticleController()
 const articleView = new ArticleView()
+const util = new Util()
 
-async function init() {
-    articles.value = await articleController.getArticles()
-}
+await articleController.init()
 
-init()
+
+
 </script>
 
 
@@ -153,13 +193,13 @@ init()
                 <label class="labelPlaceholder">content</label>
             </div>
             <div style="margin-top:3px;">
-                <button type="button" class="btn btn-sm btn-success mar3" @click="articleView.resetFields"
+                <button type="button" class="btn btn-sm btn-success marginRight3" @click="articleView.resetFields"
                     v-if="!editMode">Cancel</button>
-                <button type="button" class="btn btn-sm btn-primary mar3" @click="articleController.addArticle"
+                <button type="button" class="btn btn-sm btn-primary marginRight3" @click="articleController.addArticle"
                     v-if="editMode">Add</button>
-                <button type="button" class="btn btn-sm btn-primary mar3" @click="articleController.editArticle"
+                <button type="button" class="btn btn-sm btn-primary marginRight3" @click="articleController.editArticle"
                     v-if="!editMode">Edit</button>
-                <button type="button" class="btn btn-sm btn-danger mar3" @click="articleController.deleteArticle"
+                <button type="button" class="btn btn-sm btn-danger marginRight3" @click="articleController.deleteArticle"
                     v-if="!editMode">Delete</button>
             </div>
         </div>
@@ -176,7 +216,8 @@ init()
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(article, index) in articles" :key="article.id" @click="articleController.clickArticle(article)">
+                    <tr v-for="(article, index) in articles" :key="article.id"
+                        @click="articleController.clickArticle(article)">
                         <td>{{ article.id }}</td>
                         <td>{{ article.title }}</td>
                         <td>{{ article.content }}</td>
@@ -186,6 +227,48 @@ init()
                 </tbody>
             </table>
         </div>
+        <div class="flexCenter">
+            <ul class="pagination pagination-sm">
+                <li :class="['page-item', { 'disabled': pagination.start <= 1 }]"
+                    @click="articleController.movePage(pagination.previous)">
+                    <a class="page-link" href="#">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li :class="['page-item']" @click="articleController.movePage(1)" v-if="pagination.start > 1">
+                    <a class="page-link" href="#">
+                        1
+                    </a>
+                </li>
+                <li :class="['page-item']" @click="articleController.movePage(1)" v-if="pagination.start > 1">
+                    <a class="page-link" href="#">
+                        ...
+                    </a>
+                </li>
+                <li class="page-item" v-for="p in util.range(pagination.start, pagination.end)"
+                    @click="articleController.movePage(p)">
+                    <a href="#" :key="p" :class="['page-link', { 'active': p === pagination.currentPage }]">{{ p }}</a>
+                </li>
+                <li :class="['page-item']" @click="articleController.movePage(pagination.pageCount)"
+                    v-if="pagination.end < pagination.pageCount">
+                    <a class="page-link" href="#">
+                        ...
+                    </a>
+                </li>
+                <li :class="['page-item']" @click="articleController.movePage(pagination.pageCount)"
+                    v-if="pagination.end < pagination.pageCount">
+                    <a class="page-link" href="#">
+                        {{ pagination.pageCount }}
+                    </a>
+                </li>
+                <li :class="['page-item', { 'disabled': pagination.end >= pagination.pageCount }]"
+                    @click="articleController.movePage(pagination.next)">
+                    <a class="page-link" href="#">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
 </template>
 
@@ -194,11 +277,16 @@ init()
     cursor: pointer;
 }
 
-.mar3 {
+.marginRight3 {
     margin-right: 3px;
 }
 
 .labelPlaceholder {
     color: #aaa
+}
+
+.flexCenter {
+    display: flex;
+    justify-content: center
 }
 </style>

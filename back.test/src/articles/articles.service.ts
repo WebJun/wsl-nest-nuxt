@@ -10,14 +10,19 @@ export class ArticlesService {
     private usersRepository: Repository<Article>,
   ) {}
 
-  async findAll(): Promise<Article[]> {
-    return await this.usersRepository.find({
+  async findAll(page: number = 1, limit: number = 10): Promise<Article[]> {
+    const skip = (page - 1) * limit;
+    return this.usersRepository.find({
+      skip: skip,
+      take: limit,
       order: {
         id: 'DESC',
       },
     });
   }
-
+  async count(): Promise<number> {
+    return this.usersRepository.count();
+  }
   async findOne(id: number): Promise<Article | null> {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) {

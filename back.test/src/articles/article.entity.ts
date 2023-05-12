@@ -15,15 +15,12 @@ export class Article {
   content: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  hj_created_at: Date;
+  createdAt: Date;
 
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
   })
-  hj_updated_at: Date;
-
-  //   @DeleteDateColumn({ nullable: false })
-  //   deletedAt: Date;
+  updatedAt: Date;
 }
