@@ -151,16 +151,21 @@ let id: Ref<number> = ref(0)
 let editMode: Ref<boolean> = ref(true)
 let articles: Ref<Article[]> = ref([])
 let page: Ref<number> = ref(1)
-// let pagination: Ref<Pagination> = ref()
-let pagination: Ref<any> = ref()
+let pagination: Ref<Pagination> = ref({
+    totalCount: 1,
+    pageCount: 1,
+    currentPage: 1,
+    start: 1,
+    end: 1,
+    previous: 1,
+    next: 1,
+})
 
 const articleController = new ArticleController()
 const articleView = new ArticleView()
 const util = new Util()
 
-await articleController.init()
-
-
+articleController.init()
 
 </script>
 
@@ -231,39 +236,39 @@ await articleController.init()
             <ul class="pagination pagination-sm">
                 <li :class="['page-item', { 'disabled': pagination.start <= 1 }]"
                     @click="articleController.movePage(pagination.previous)">
-                    <a class="page-link" href="#">
+                    <a class="page-link">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
                 <li :class="['page-item']" @click="articleController.movePage(1)" v-if="pagination.start > 1">
-                    <a class="page-link" href="#">
+                    <a class="page-link">
                         1
                     </a>
                 </li>
                 <li :class="['page-item']" @click="articleController.movePage(1)" v-if="pagination.start > 1">
-                    <a class="page-link" href="#">
+                    <a class="page-link">
                         ...
                     </a>
                 </li>
                 <li class="page-item" v-for="p in util.range(pagination.start, pagination.end)"
                     @click="articleController.movePage(p)">
-                    <a href="#" :key="p" :class="['page-link', { 'active': p === pagination.currentPage }]">{{ p }}</a>
+                    <a :key="p" :class="['page-link', { 'active': p === pagination.currentPage }]">{{ p }}</a>
                 </li>
                 <li :class="['page-item']" @click="articleController.movePage(pagination.pageCount)"
                     v-if="pagination.end < pagination.pageCount">
-                    <a class="page-link" href="#">
+                    <a class="page-link">
                         ...
                     </a>
                 </li>
                 <li :class="['page-item']" @click="articleController.movePage(pagination.pageCount)"
                     v-if="pagination.end < pagination.pageCount">
-                    <a class="page-link" href="#">
+                    <a class="page-link">
                         {{ pagination.pageCount }}
                     </a>
                 </li>
                 <li :class="['page-item', { 'disabled': pagination.end >= pagination.pageCount }]"
                     @click="articleController.movePage(pagination.next)">
-                    <a class="page-link" href="#">
+                    <a class="page-link">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>

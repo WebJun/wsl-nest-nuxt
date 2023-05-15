@@ -14,7 +14,7 @@ export class ArticlesService {
     let { page, limit, sort } = params;
     limit = Number(limit);
     // console.log(sort);
-    console.log(typeof limit);
+    // console.log(typeof limit);
     // await new Promise((resolve) => setTimeout(resolve, 1000));
     let currentPage = Number(page);
     const morePage = 2;
