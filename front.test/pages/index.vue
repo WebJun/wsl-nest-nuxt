@@ -71,22 +71,12 @@ class ArticleModel {
     }
 }
 
-class ArticleView {
-    resetFields() {
-        editMode.value = true;
-        title.value = '';
-        content.value = '';
-    }
-}
-
 class ArticleController {
     private readonly util: Util
     private readonly articleModel: ArticleModel
-    private readonly articleView: ArticleView
 
     constructor() {
         this.articleModel = new ArticleModel()
-        this.articleView = new ArticleView()
         this.util = new Util
     }
 
@@ -112,7 +102,7 @@ class ArticleController {
         };
         await this.articleModel.add(postData)
         await this.getArticles()
-        this.articleView.resetFields()
+        this.resetFields()
     }
 
     public async editArticle(): Promise<void> {
@@ -123,13 +113,13 @@ class ArticleController {
         }
         await this.articleModel.edit(id.value as number, postData)
         await this.getArticles()
-        this.articleView.resetFields()
+        this.resetFields()
     }
 
     public async deleteArticle(): Promise<void> {
         await this.articleModel.delete(id.value as number)
         await this.getArticles()
-        this.articleView.resetFields()
+        this.resetFields()
     }
 
     public clickArticle(article: Article): void {
@@ -142,6 +132,12 @@ class ArticleController {
     public async movePage(p: number) {
         page.value = p
         await this.getArticles()
+    }
+
+    public resetFields() {
+        editMode.value = true;
+        title.value = '';
+        content.value = '';
     }
 }
 
@@ -162,7 +158,6 @@ let pagination: Ref<Pagination> = ref({
 })
 
 const articleController = new ArticleController()
-const articleView = new ArticleView()
 const util = new Util()
 
 articleController.init()
@@ -198,7 +193,7 @@ articleController.init()
                 <label class="labelPlaceholder">content</label>
             </div>
             <div style="margin-top:3px;">
-                <button type="button" class="btn btn-sm btn-success marginRight3" @click="articleView.resetFields"
+                <button type="button" class="btn btn-sm btn-success marginRight3" @click="articleController.resetFields"
                     v-if="!editMode">Cancel</button>
                 <button type="button" class="btn btn-sm btn-primary marginRight3" @click="articleController.addArticle"
                     v-if="editMode">Add</button>
