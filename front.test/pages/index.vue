@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import axios, { AxiosResponse } from 'axios'
-import ClassicEditor from '@ckeditor/ckeditor5-vue'
 
 interface Article {
     id: number
@@ -77,10 +76,11 @@ class ArticleModel {
 class ArticleController {
     private readonly util: Util
     private readonly articleModel: ArticleModel
+    private fileInput!: HTMLInputElement
 
     constructor() {
         this.articleModel = new ArticleModel()
-        this.util = new Util
+        this.util = new Util()
     }
 
     public async init(): Promise<void> {
@@ -145,9 +145,12 @@ class ArticleController {
         editMode.value = true;
         title.value = '';
         content.value = '';
+        fileData.value = '';
+        this.fileInput.value = "";
     }
 
     public changeFile(event: any) {
+        this.fileInput = event.target
         fileData.value = event.target.files;
     }
 }
@@ -168,7 +171,6 @@ let pagination: Ref<Pagination> = ref({
     previous: 1,
     next: 1,
 })
-let imgs: Ref<any> = ref([])
 
 const articleController = new ArticleController()
 const util = new Util()
@@ -179,7 +181,6 @@ articleController.init()
 
 <template>
     <div>
-        <img v-for="img in imgs" :src="img" style="width:100px;" />
         <div
             class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Dashboard</h1>
@@ -197,7 +198,7 @@ articleController.init()
 
         <div>
             <div class="form-floating mb-3">
-                <input type="email" class="form-control title" placeholder="title" v-model="title">
+                <input type="text" class="form-control title" placeholder="title" v-model="title">
                 <label class="labelPlaceholder">title</label>
             </div>
             <div class="form-floating">
@@ -206,9 +207,8 @@ articleController.init()
                 <label class="labelPlaceholder">content</label>
             </div>
             <div class="input-group mb-3" style="margin-top:5px;">
-                <input type="file" class="form-control" id="inputGroupFile02" @change="articleController.changeFile"
-                    multiple>
-                <label class="input-group-text" for="inputGroupFile02">Upload</label>
+                <input type="file" class="form-control" id="abc" @change="articleController.changeFile" multiple>
+                <label class="input-group-text" for="abc">Upload</label>
             </div>
             <div style="margin-top:3px;">
                 <button type="button" class="btn btn-sm btn-success marginRight3" @click="articleController.resetFields"
