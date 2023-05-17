@@ -32,12 +32,6 @@
                                 </router-link>
                             </li>
                             <li class="nav-item">
-                                <router-link to="/articles" class="nav-link" aria-current="page">
-                                    <span data-feather="home"></span>
-                                    Articles
-                                </router-link>
-                            </li>
-                            <li class="nav-item">
                                 <a class="nav-link" href="#">
                                     <span data-feather="shopping-cart"></span>
                                     Products

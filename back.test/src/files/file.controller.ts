@@ -6,15 +6,10 @@ import { FileService } from './file.service';
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
-  //   @Post('upload')
-  //   @UseInterceptors(AnyFilesInterceptor())
-  //   uploadFile(@UploadedFiles() file: Express.Multer.File) {
-  //     return this.fileService.uploadFile(file);
-  //   }
-
   @Post('upload')
-  @UseInterceptors(FilesInterceptor('imgfile[]'))
+  @UseInterceptors(AnyFilesInterceptor())
   uploadFile(@UploadedFiles() files: Array<Express.Multer.File>) {
+    console.log(files);
     return this.fileService.uploadFile(files);
   }
 }

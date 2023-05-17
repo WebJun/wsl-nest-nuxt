@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import axios, { AxiosResponse } from 'axios'
+import ClassicEditor from '@ckeditor/ckeditor5-vue'
 
 interface Article {
     id: number
@@ -7,12 +8,14 @@ interface Article {
     content: string
     createdAt: string
     userId: number
+    images: any
 }
 
 interface ArticlePostData {
     title: string
     content: string
     userId: number
+    images: any
 }
 
 interface Pagination {
@@ -95,11 +98,14 @@ class ArticleController {
     }
 
     public async addArticle(): Promise<void> {
-        const postData: ArticlePostData = {
-            title: title.value ?? '',
-            content: content.value ?? '',
-            userId: 1,
-        };
+        const postData = new FormData();
+        for (let i = 0; i < fileData.value.length; i++) {
+            postData.append('images[]', fileData.value[i]);
+        }
+        postData.append('title', title.value ?? '',);
+        postData.append('content', content.value ?? '');
+        postData.append('userId', '1');
+
         await this.articleModel.add(postData)
         await this.getArticles()
         this.resetFields()
@@ -110,6 +116,7 @@ class ArticleController {
             title: title.value ?? '',
             content: content.value ?? '',
             userId: 1,
+            images: [],
         }
         await this.articleModel.edit(id.value as number, postData)
         await this.getArticles()
@@ -140,27 +147,7 @@ class ArticleController {
         content.value = '';
     }
 
-    public async fileUpload() {
-
-        const postData = new FormData();
-        for (let i = 0; i < fileData.value.length; i++) {
-            postData.append('imgfile[]', fileData.value[i]);
-        }
-
-        const res = await axios.post(`http://back.test/file/upload`, postData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-        for (let i = 0; i < res.data.length; i++) {
-            let fpn = res.data[i].filePath;
-            fpn = fpn.substr(6, 999);
-            imgs.value.push(`http://back.test/${fpn}`)
-        }
-    }
-
     public changeFile(event: any) {
-        console.log(event)
         fileData.value = event.target.files;
     }
 }
@@ -187,8 +174,6 @@ const articleController = new ArticleController()
 const util = new Util()
 
 articleController.init()
-
-
 
 </script>
 
@@ -230,8 +215,6 @@ articleController.init()
                     v-if="!editMode">Cancel</button>
                 <button type="button" class="btn btn-sm btn-primary marginRight3" @click="articleController.addArticle"
                     v-if="editMode">Add</button>
-                <button type="button" class="btn btn-sm btn-primary marginRight3" @click="articleController.fileUpload"
-                    v-if="editMode">fileUpload</button>
                 <button type="button" class="btn btn-sm btn-primary marginRight3" @click="articleController.editArticle"
                     v-if="!editMode">Edit</button>
                 <button type="button" class="btn btn-sm btn-danger marginRight3" @click="articleController.deleteArticle"
@@ -246,6 +229,7 @@ articleController.init()
                         <th scope="col">#</th>
                         <th scope="col">title</th>
                         <th scope="col">content</th>
+                        <th scope="col">images</th>
                         <th scope="col">userId</th>
                         <th scope="col">createdAt</th>
                     </tr>
@@ -256,6 +240,9 @@ articleController.init()
                         <td>{{ article.id }}</td>
                         <td>{{ article.title }}</td>
                         <td>{{ article.content }}</td>
+                        <td>
+                            <img v-for="img in article.images" :src="img" style="width:100px;" />
+                        </td>
                         <td>{{ article.userId }}</td>
                         <td>{{ article.createdAt }}</td>
                     </tr>

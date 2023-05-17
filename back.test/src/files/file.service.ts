@@ -7,7 +7,7 @@ export class FileService {
       throw new BadRequestException('파일이 존재하지 않습니다.');
     }
     return files.map((e) => {
-      return { filePath: e.path.substr(11, 100) };
+      return { filePath: e.path.substr(17, 100) };
     });
   }
 }

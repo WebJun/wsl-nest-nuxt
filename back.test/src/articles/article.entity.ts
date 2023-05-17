@@ -14,6 +14,9 @@ export class Article {
   @Column({ type: 'text' })
   content: string;
 
+  @Column('json')
+  images: object;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
