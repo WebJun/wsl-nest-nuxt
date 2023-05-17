@@ -18,4 +18,8 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 
 RUN adduser --disabled-password --gecos "" scv
 
+USER scv
+
+RUN umask 022
+
 ENTRYPOINT bash

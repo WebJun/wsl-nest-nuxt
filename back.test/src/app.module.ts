@@ -5,6 +5,7 @@ import { addTransactionalDataSource } from 'typeorm-transactional';
 import { getConfig, getDataSourceConfig } from './common/database/configuration';
 import { ArticlesModule } from './articles/articles.module';
 import { ConfigModule } from '@nestjs/config';
+import { FileModule } from './files/file.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ConfigModule } from '@nestjs/config';
       },
     }),
     ArticlesModule,
+    FileModule,
   ],
 })
 export class AppModule {

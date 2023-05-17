@@ -1,8 +1,16 @@
 import { Module } from '@nestjs/common';
-import { FilesService } from './file.service';
-import { FileResolver } from './file.resolver';
+import { MulterModule } from '@nestjs/platform-express';
+import { multerOptionsFactory } from 'src/common/utils/multer.options.factory';
+import { FileController } from './file.controller';
+import { FileService } from './file.service';
 
 @Module({
-  providers: [FileResolver, FilesService],
+  imports: [
+    MulterModule.registerAsync({
+      useFactory: multerOptionsFactory,
+    }),
+  ],
+  controllers: [FileController],
+  providers: [FileService],
 })
-export class FilesModule {}
+export class FileModule {}

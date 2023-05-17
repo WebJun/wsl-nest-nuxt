@@ -58,7 +58,7 @@ class ArticleModel {
         return data
     }
 
-    async add(postData: ArticlePostData): Promise<void> {
+    async add(postData: any): Promise<void> {
         await axios.post(`${this.API_URI}/articles`, postData)
     }
 
@@ -139,10 +139,35 @@ class ArticleController {
         title.value = '';
         content.value = '';
     }
+
+    public async fileUpload() {
+
+        const postData = new FormData();
+        for (let i = 0; i < fileData.value.length; i++) {
+            postData.append('imgfile[]', fileData.value[i]);
+        }
+
+        const res = await axios.post(`http://back.test/file/upload`, postData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        for (let i = 0; i < res.data.length; i++) {
+            let fpn = res.data[i].filePath;
+            fpn = fpn.substr(6, 999);
+            imgs.value.push(`http://back.test/${fpn}`)
+        }
+    }
+
+    public changeFile(event: any) {
+        console.log(event)
+        fileData.value = event.target.files;
+    }
 }
 
 let title: Ref<string> = ref('')
 let content: Ref<string> = ref('')
+let fileData: Ref<any> = ref('')
 let id: Ref<number> = ref(0)
 let editMode: Ref<boolean> = ref(true)
 let articles: Ref<Article[]> = ref([])
@@ -156,17 +181,20 @@ let pagination: Ref<Pagination> = ref({
     previous: 1,
     next: 1,
 })
+let imgs: Ref<any> = ref([])
 
 const articleController = new ArticleController()
 const util = new Util()
 
 articleController.init()
 
-</script>
 
+
+</script>
 
 <template>
     <div>
+        <img v-for="img in imgs" :src="img" style="width:100px;" />
         <div
             class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Dashboard</h1>
@@ -192,11 +220,18 @@ articleController.init()
                     style="height: 100px"></textarea>
                 <label class="labelPlaceholder">content</label>
             </div>
+            <div class="input-group mb-3" style="margin-top:5px;">
+                <input type="file" class="form-control" id="inputGroupFile02" @change="articleController.changeFile"
+                    multiple>
+                <label class="input-group-text" for="inputGroupFile02">Upload</label>
+            </div>
             <div style="margin-top:3px;">
                 <button type="button" class="btn btn-sm btn-success marginRight3" @click="articleController.resetFields"
                     v-if="!editMode">Cancel</button>
                 <button type="button" class="btn btn-sm btn-primary marginRight3" @click="articleController.addArticle"
                     v-if="editMode">Add</button>
+                <button type="button" class="btn btn-sm btn-primary marginRight3" @click="articleController.fileUpload"
+                    v-if="editMode">fileUpload</button>
                 <button type="button" class="btn btn-sm btn-primary marginRight3" @click="articleController.editArticle"
                     v-if="!editMode">Edit</button>
                 <button type="button" class="btn btn-sm btn-danger marginRight3" @click="articleController.deleteArticle"
