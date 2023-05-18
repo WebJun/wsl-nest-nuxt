@@ -1,23 +1,6 @@
 <script lang="ts" setup>
 import axios, { AxiosResponse } from 'axios'
 
-
-const router = useRouter();
-// setup() {
-const route = useRoute()
-// }
-
-
-
-// router.push('/your-route');
-console.log(router)
-console.log(route.query.page)
-
-
-// history.pushState({}, 'search', '/?aaa');
-// router.push('?aaa');
-
-
 interface Article {
     id: number
     title: string
@@ -165,7 +148,9 @@ class ArticleController {
         title.value = '';
         content.value = '';
         fileData.value = '';
-        this.fileInput.value = "";
+        if (this.fileInput !== undefined) {
+            this.fileInput.value = "";
+        }        
     }
 
     public changeFile(event: any) {
@@ -191,6 +176,8 @@ let pagination: Ref<Pagination> = ref({
     next: 1,
 })
 
+const router = useRouter();
+const route = useRoute()
 const articleController = new ArticleController()
 const util = new Util()
 
