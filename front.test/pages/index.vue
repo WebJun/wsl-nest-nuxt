@@ -1,6 +1,23 @@
 <script lang="ts" setup>
 import axios, { AxiosResponse } from 'axios'
 
+
+const router = useRouter();
+// setup() {
+const route = useRoute()
+// }
+
+
+
+// router.push('/your-route');
+console.log(router)
+console.log(route.query.page)
+
+
+// history.pushState({}, 'search', '/?aaa');
+// router.push('?aaa');
+
+
 interface Article {
     id: number
     title: string
@@ -84,6 +101,7 @@ class ArticleController {
     }
 
     public async init(): Promise<void> {
+        page.value = Number(route.query.page ?? 1)
         await this.getArticles()
     }
 
@@ -95,6 +113,7 @@ class ArticleController {
             article.createdAt = this.util.getDatetime(article.createdAt)
             return article
         })
+        router.push(`?page=${page.value}`);
     }
 
     public async addArticle(): Promise<void> {
