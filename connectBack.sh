@@ -1,1 +1,1 @@
-docker exec -it wsl-nest-nuxt-back.test-1 su scv
+docker exec -it wsl-nest-nuxt-back.test-1 bash

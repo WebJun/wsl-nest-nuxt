@@ -1,1 +1,1 @@
-docker exec -it wsl-nest-nuxt-back.test-1 su scv -c "yarn start:dev"
+docker exec -it wsl-nest-nuxt-back.test-1 yarn start:dev
