@@ -9,29 +9,38 @@ export default defineNuxtConfig({
         'pages:extend'(pages) {
             // add a route
             pages.push({
-                name: 'articles',
+                name: 'index',
                 path: '/',
                 file: '~/pages/articles.vue',
             });
-            // remove routes
-            function removePagesMatching(
-                pattern: RegExp,
-                pages: NuxtPage[] = []
-            ) {
-                const pagesToRemove = [];
-                console.log(pages);
-                for (const page of pages) {
-                    if (pattern.test(page.file as string)) {
-                        pagesToRemove.push(page);
-                    } else {
-                        removePagesMatching(pattern, page.children);
-                    }
-                }
-                for (const page of pagesToRemove) {
-                    pages.splice(pages.indexOf(page), 1);
-                }
-            }
-            removePagesMatching(/\.ts$/, pages);
+            pages.push({
+                name: 'about',
+                path: '/about',
+                file: '~/pages/about.vue',
+            });
+            pages.push({
+                name: 'articles',
+                path: '/articles',
+                file: '~/pages/articles.vue',
+            });
+            // // remove routes
+            // function removePagesMatching(
+            //     pattern: RegExp,
+            //     pages: NuxtPage[] = []
+            // ) {
+            //     const pagesToRemove = [];
+            //     for (const page of pages) {
+            //         if (pattern.test(page.file as string)) {
+            //             pagesToRemove.push(page);
+            //         } else {
+            //             removePagesMatching(pattern, page.children);
+            //         }
+            //     }
+            //     for (const page of pagesToRemove) {
+            //         pages.splice(pages.indexOf(page), 1);
+            //     }
+            // }
+            // removePagesMatching(/\.ts$/, pages);
         },
     },
 });

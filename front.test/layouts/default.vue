@@ -20,22 +20,22 @@
                     <div class="position-sticky pt-3">
                         <ul class="nav flex-column">
                             <li class="nav-item">
-                                <router-link to="/" class="nav-link active" aria-current="page">
+                                <router-link :to="{ name: 'index' }" class="nav-link active" aria-current="page">
                                     <span data-feather="home"></span>
                                     Home
                                 </router-link>
                             </li>
                             <li class="nav-item">
-                                <router-link to="/about" class="nav-link" aria-current="page">
+                                <router-link :to="{ name: 'about' }" class="nav-link" aria-current="page">
                                     <span data-feather="home"></span>
                                     About
                                 </router-link>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <span data-feather="shopping-cart"></span>
-                                    Products
-                                </a>
+                                <router-link :to="{ name: 'articles' }" class="nav-link" aria-current="page">
+                                    <span data-feather="home"></span>
+                                    Articles
+                                </router-link>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#">
