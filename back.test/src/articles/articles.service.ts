@@ -10,15 +10,15 @@ export class ArticlesService {
     private usersRepository: Repository<Article>,
   ) {}
 
+  private readonly backendDomain: string = 'http://back.test';
+
   async lists(params) {
     let { page, limit, sort } = params;
     limit = Number(limit);
-    // console.log(sort);
-    // console.log(typeof limit);
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
     let currentPage = Number(page);
     const morePage = 2;
-    const items = await this.findAll(currentPage, limit);
+    let items = await this.findAll(currentPage, limit);
+    items = this.attachDomainForImages(items);
     const totalCount = await this.count();
     const pageCount = Math.ceil(totalCount / limit);
     currentPage = currentPage < 1 ? 1 : currentPage;
@@ -78,5 +78,15 @@ export class ArticlesService {
 
   async destroy(id: number): Promise<void> {
     await this.usersRepository.delete(id);
+  }
+
+  private attachDomainForImages(items: any[]): Article[] {
+    items = items.map((article) => {
+      article.images = (article.images as any[]).map((path) => {
+        return `${this.backendDomain}${path}`;
+      });
+      return article;
+    });
+    return items;
   }
 }

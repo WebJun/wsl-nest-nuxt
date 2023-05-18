@@ -17,17 +17,7 @@ export class ArticlesController {
 
   @Get()
   async index(@Query() params: PaginationParams): Promise<any> {
-    let { page, limit, sort } = params;
-    limit = Number(limit);
-    let articles = await this.articleService.lists(params);
-
-    articles.items = articles.items.map((e) => {
-      let qqq = e.images as any[];
-      for (let i = 0; i < qqq.length; i++) {
-        e.images[i] = `http://back.test${qqq[i]}`;
-      }
-      return e;
-    });
+    const articles = (await this.articleService.lists(params)) as any;
     return articles;
   }
 
